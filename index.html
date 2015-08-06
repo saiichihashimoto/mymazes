@@ -104,6 +104,19 @@
                 }
                 return maze;
             }
+            function can_go(maze, pos, dir) {
+                switch (dir) {
+                    case 'up':
+                        return (pos[0] !== 0) && maze[pos[0] - 1][pos[1]][0];
+                    case 'down':
+                        return (pos[0] !== height - 1) && maze[pos[0]][pos[1]][0];
+                    case 'right':
+                        return (pos[1] !== width - 1) && maze[pos[0]][pos[1]][1];
+                    case 'left':
+                        return (pos[1] !== 0) && maze[pos[0]][pos[1] - 1][1];
+                }
+                return false;
+            }
             function play_level(level) {
                 var height = 4 + 2 * level;
                 var width = 4 + 2 * level;
@@ -140,40 +153,28 @@
                     switch (e.which) {
                         case 37:
                         case 72:
-                            if (pos[1] === 0) {
-                                return;
-                            }
-                            if (!maze[pos[0]][pos[1] - 1][1]) {
+                            if (!can_go(maze, pos, 'left')) {
                                 return;
                             }
                             pos[1]--;
                             break;
                         case 38:
                         case 75:
-                            if (pos[0] === 0) {
-                                return;
-                            }
-                            if (!maze[pos[0] - 1][pos[1]][0]) {
+                            if (!can_go(maze, pos, 'up')) {
                                 return;
                             }
                             pos[0]--;
                             break;
                         case 39:
                         case 76:
-                            if (pos[1] === width - 1) {
-                                return;
-                            }
-                            if (!maze[pos[0]][pos[1]][1]) {
+                            if (!can_go(maze, pos, 'right')) {
                                 return;
                             }
                             pos[1]++;
                             break;
                         case 40:
                         case 74:
-                            if (pos[0] === height - 1) {
-                                return;
-                            }
-                            if (!maze[pos[0]][pos[1]][0]) {
+                            if (!can_go(maze, pos, 'down')) {
                                 return;
                             }
                             pos[0]++;
