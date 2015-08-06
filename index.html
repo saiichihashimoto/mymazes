@@ -33,13 +33,15 @@
                 border-right: 2px solid black;
             }
             .grem {
-                background: red;
                 position: absolute;
                 left: 0;
                 top: 0;
                 border-radius: 50%;
                 margin: 4px;
                 transition: all .05s ease-in-out;
+            }
+            #good_grem {
+                background: blue;
             }
             .stats {
                 position: absolute;
@@ -54,9 +56,7 @@
             <b>Time Remaining:</b> <span id="time_remaining"></span><br>
         </div>
         <div class="maze-container">
-            <div id="maze" class="maze">
-                <div id="grem" class="grem"></div>
-            </div>
+            <div id="maze" class="maze"></div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script>
@@ -66,7 +66,7 @@
                     return cell;
                 }
                 next_cell = findTopCell(disjoint_set, next_cell);
-                // disjoint_set[cell[0]][cell[1]] = next_cell;
+                disjoint_set[cell[0]][cell[1]] = next_cell;
                 return next_cell;
             }
             function generateMaze(height, width) {
@@ -109,9 +109,9 @@
                     case 'up':
                         return (pos[0] !== 0) && maze[pos[0] - 1][pos[1]][0];
                     case 'down':
-                        return (pos[0] !== height - 1) && maze[pos[0]][pos[1]][0];
+                        return (pos[0] !== maze.length - 1) && maze[pos[0]][pos[1]][0];
                     case 'right':
-                        return (pos[1] !== width - 1) && maze[pos[0]][pos[1]][1];
+                        return (pos[1] !== maze[0].length - 1) && maze[pos[0]][pos[1]][1];
                     case 'left':
                         return (pos[1] !== 0) && maze[pos[0]][pos[1] - 1][1];
                 }
@@ -126,7 +126,6 @@
 
                 var maze_element = $('#maze')
                     .css('width', width * size);
-                maze_element.find('.row').remove();
                 for (var y = 0; y < height; y++) {
                     var maze_row = $('<div class="row"></div>').appendTo(maze_element);
                     for (var x = 0; x < width; x++) {
@@ -142,7 +141,8 @@
                 }
 
                 var pos = [0, 0];
-                var grem = $('#grem')
+                var good_grem = $('<div id="good_grem" class="grem"></div>')
+                    .appendTo(maze_element)
                     .css('height', size - 8)
                     .css('width', size - 8)
                     .css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
@@ -182,9 +182,10 @@
                         default:
                             return;
                     }
-                    grem.css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
+                    good_grem.css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
                     if (pos[0] === height - 1 && pos[1] === width - 1) {
                         playing = false;
+                        maze_element.empty();
                         play_level(level + 1);
                     }
                 });
