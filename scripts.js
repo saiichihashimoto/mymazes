@@ -436,6 +436,7 @@ function play_level(level, score) {
                 return;
             }
             playing = false;
+            ga('send', 'pageview', { page: '/#' + (level + 1) });
             play_level(level + 1, score + (level + 1) * Math.ceil(time_remaining));
         }
     });
@@ -465,4 +466,5 @@ function play_level(level, score) {
         }
     });
 }
+ga('send', 'pageview', { page: '/#' + (parseInt(window.location.hash.substr(1)) || 0) });
 play_level(parseInt(window.location.hash.substr(1)) || 0, 0);
