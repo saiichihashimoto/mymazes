@@ -190,6 +190,7 @@
             var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
             var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
             function play_level(level) {
+                window.location.hash = level;
                 var height = 4 + 2 * Math.min(11, level);
                 var width = 4 + 2 * Math.min(11, level);
                 switch (level) {
@@ -216,6 +217,7 @@
                     size = (Math.min($(window).height(), $(window).width()) - 50) / Math.max(height, width) / Math.sqrt(2);
                 }
                 var playing = true;
+                var end = [height - 1, width - 1];
 
                 var maze_element = $('#maze')
                     .css('width', width * size)
@@ -225,7 +227,7 @@
                     .removeClass('pivot-270');
                 draw_maze(maze, maze_element, size, level);
 
-                var good_grem = $('<div id="end_grem" class="grem"></div>')
+                var end_grem = $('<div id="end_grem" class="grem"></div>')
                     .appendTo(maze_element)
                     .css('height', size - 8)
                     .css('width', size - 8)
@@ -250,7 +252,7 @@
                         }
                         right_pos = go(right_pos, right_dir)
                         right_grem.css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
-                        if (right_pos[0] === height - 1 && right_pos[1] === width - 1) {
+                        if (right_pos[0] === end[0] && right_pos[1] === end[1]) {
                             playing = false;
                         }
                     }, 150 - Math.min(70, (level - 5) * 10));
@@ -275,7 +277,7 @@
                         }
                         left_pos = go(left_pos, left_dir)
                         left_grem.css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
-                        if (left_pos[0] === height - 1 && left_pos[1] === width - 1) {
+                        if (left_pos[0] === end[0] && left_pos[1] === end[1]) {
                             playing = false;
                         }
                     }, 150 - Math.min(70, (level - 5) * 10));
@@ -437,7 +439,12 @@
                                 .toggleClass('border-right', !can_go(maze, [pos[0], pos[1] - 1], 'right'));
                         }
                     }
-                    if (pos[0] === height - 1 && pos[1] === width - 1) {
+                    if (pos[0] === end[0] && pos[1] === end[1]) {
+                        if (level === 20 && end[0] !== 0 && end[1] !== 0) {
+                            end = [0, 0];
+                            end_grem.css('transform', 'translate3d(' + (end[1] * size) + 'px, ' + (end[0] * size) + 'px, 0)');
+                            return;
+                        }
                         playing = false;
                         maze_element.empty();
                         play_level(level + 1);
@@ -454,13 +461,13 @@
                     if (!start) start = timestamp;
                     var time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
                     playing = (time_remaining > 0) && playing;
-                    time_remaining_elem.text(playing ? time_remaining.toFixed(3) : 0);
+                    time_remaining_elem.text(time_remaining.toFixed(3));
                     if (playing) {
                         window.requestAnimationFrame(updateStats);
                     }
                 });
             }
-            play_level(0);
+            play_level(parseInt(window.location.hash.substr(1)) || 0);
         </script>
     </body>
 </html>
