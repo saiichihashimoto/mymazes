@@ -43,6 +43,12 @@
             #good_grem {
                 background: blue;
             }
+            #bad_grem {
+                background: red;
+            }
+            #end_grem {
+                background: green;
+            }
             .stats {
                 position: absolute;
                 top: 0;
@@ -117,6 +123,21 @@
                 }
                 return false;
             }
+            function go(pos, dir) {
+                switch (dir) {
+                    case 'up':
+                        return [pos[0] - 1, pos[1]];
+                    case 'down':
+                        return [pos[0] + 1, pos[1]];
+                    case 'right':
+                        return [pos[0], pos[1] + 1];
+                    case 'left':
+                        return [pos[0], pos[1] - 1];
+                }
+                return pos;
+            }
+            var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
+            var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
             function play_level(level) {
                 var height = 4 + 2 * level;
                 var width = 4 + 2 * level;
@@ -140,6 +161,64 @@
                     }
                 }
 
+                var good_grem = $('<div id="end_grem" class="grem"></div>')
+                    .appendTo(maze_element)
+                    .css('height', size - 8)
+                    .css('width', size - 8)
+                    .css('transform', 'translate3d(' + ((width - 1) * size) + 'px, ' + ((height - 1) * size) + 'px, 0)');
+
+                if (level >= 5) {
+                    var right_dir = 'right';
+                    var right_pos = [0, 0];
+                    var right_grem = $('<div id="bad_grem" class="grem"></div>')
+                        .appendTo(maze_element)
+                        .css('height', size - 8)
+                        .css('width', size - 8)
+                        .css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
+                    function move_right_grem() {
+                        if (!playing) {
+                            clearInterval(move_right_grem);
+                            return;
+                        }
+                        right_dir = clockwise[right_dir];
+                        while (!can_go(maze, right_pos, right_dir)) {
+                            right_dir = counter_clockwise[right_dir];
+                        }
+                        right_pos = go(right_pos, right_dir)
+                        right_grem.css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
+                        if (right_pos[0] === height - 1 && right_pos[1] === width - 1) {
+                            playing = false;
+                        }
+                    }
+                    setInterval(move_right_grem, 150 - Math.min(75, (level - 5) * 10));
+                }
+
+                if (level >= 6) {
+                    var left_dir = 'down';
+                    var left_pos = [0, 0];
+                    var left_grem = $('<div id="bad_grem" class="grem"></div>')
+                        .appendTo(maze_element)
+                        .css('height', size - 8)
+                        .css('width', size - 8)
+                        .css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
+                    function move_left_grem() {
+                        if (!playing) {
+                            clearInterval(move_left_grem);
+                            return;
+                        }
+                        left_dir = counter_clockwise[left_dir];
+                        while (!can_go(maze, left_pos, left_dir)) {
+                            left_dir = clockwise[left_dir];
+                        }
+                        left_pos = go(left_pos, left_dir)
+                        left_grem.css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
+                        if (left_pos[0] === height - 1 && left_pos[1] === width - 1) {
+                            playing = false;
+                        }
+                    }
+                    setInterval(move_left_grem, 150 - Math.min(75, (level - 5) * 10));
+                }
+
                 var pos = [0, 0];
                 var good_grem = $('<div id="good_grem" class="grem"></div>')
                     .appendTo(maze_element)
@@ -156,28 +235,28 @@
                             if (!can_go(maze, pos, 'left')) {
                                 return;
                             }
-                            pos[1]--;
+                            pos = go(pos, 'left')
                             break;
                         case 38:
                         case 75:
                             if (!can_go(maze, pos, 'up')) {
                                 return;
                             }
-                            pos[0]--;
+                            pos = go(pos, 'up')
                             break;
                         case 39:
                         case 76:
                             if (!can_go(maze, pos, 'right')) {
                                 return;
                             }
-                            pos[1]++;
+                            pos = go(pos, 'right')
                             break;
                         case 40:
                         case 74:
                             if (!can_go(maze, pos, 'down')) {
                                 return;
                             }
-                            pos[0]++;
+                            pos = go(pos, 'down')
                             break;
                         default:
                             return;
