@@ -7,6 +7,9 @@
                 box-sizing: border-box;
                 font-family: "Lucida Console", Monaco, monospace;
             }
+            body {
+                border-color: black;
+            }
             .maze-container, .overlay-container {
                 display: flex;
                 align-items: center;
@@ -24,16 +27,16 @@
                 float:left;
             }
             .border-top {
-                border-top: 2px solid black;
+                border-top: 2px solid;
             }
             .border-down {
-                border-bottom: 2px solid black;
+                border-bottom: 2px solid;
             }
             .border-left {
-                border-left: 2px solid black;
+                border-left: 2px solid;
             }
             .border-right {
-                border-right: 2px solid black;
+                border-right: 2px solid;
             }
             .grem {
                 position: absolute;
@@ -139,6 +142,11 @@
                 position: absolute;
                 top: 0;
                 left: 0;
+            }
+            .level-13, .level-14 {
+                background: black;
+                color: white;
+                border-color: white;
             }
         </style>
     </head>
@@ -311,6 +319,10 @@
                 }
                 var playing = true;
                 var end = (level !== BATTLE_STAGE) ? [height - 1, width - 1] : [19, 26];
+
+                $('body')
+                    .removeClass('level-' + (level - 1))
+                    .addClass('level-' + level);
 
                 var maze_element = $('#maze')
                     .empty()
