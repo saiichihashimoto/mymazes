@@ -13,6 +13,7 @@
             }
             .maze {
                 position: relative;
+                transition: all .5s ease-in-out;
             }
             .row {
                 overflow: auto;
@@ -23,7 +24,7 @@
             .border-top {
                 border-top: 2px solid black;
             }
-            .border-bottom {
+            .border-down {
                 border-bottom: 2px solid black;
             }
             .border-left {
@@ -53,6 +54,38 @@
                 position: absolute;
                 top: 0;
                 left: 0;
+            }
+            .spinning {
+                animation: spin 60000ms linear 0s infinite;
+                -webkit-animation: spin 60000ms linear 0s infinite;
+                -moz-animation: spin 60000ms linear 0s infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            @-webkit-keyframes spin {
+                from { -webkit-transform: rotate(0deg); }
+                to { -webkit-transform: rotate(360deg); }
+            }
+            @-moz-keyframes spin {
+                from { -moz-transform: rotate(0deg); }
+                to { -moz-transform: rotate(360deg); }
+            }
+            .pivot-90 {
+                transform: rotate(90deg);
+                -webkit-transform: rotate(90deg);
+                -moz-transform: rotate(90deg);
+            }
+            .pivot-180 {
+                transform: rotate(180deg);
+                -webkit-transform: rotate(180deg);
+                -moz-transform: rotate(180deg);
+            }
+            .pivot-270 {
+                transform: rotate(270deg);
+                -webkit-transform: rotate(270deg);
+                -moz-transform: rotate(270deg);
             }
         </style>
     </head>
@@ -110,21 +143,6 @@
                 }
                 return maze;
             }
-            function draw_maze(maze, maze_element, size) {
-                for (var y = 0; y < maze.length; y++) {
-                    var maze_row = $('<div class="row"></div>').appendTo(maze_element);
-                    for (var x = 0; x < maze[y].length; x++) {
-                        var maze_cell = $('<div class="cell"></div>')
-                            .appendTo(maze_row)
-                            .toggleClass('border-top', y === 0)
-                            .toggleClass('border-left', x === 0)
-                            .toggleClass('border-bottom', (y === maze.length - 1) || !maze[y][x][0])
-                            .toggleClass('border-right', (x === maze[y].length - 1) || !maze[y][x][1])
-                            .css('height', size)
-                            .css('width', size);
-                    }
-                }
-            }
             function can_go(maze, pos, dir) {
                 switch (dir) {
                     case 'up':
@@ -151,18 +169,61 @@
                 }
                 return pos;
             }
+            function draw_maze(maze, maze_element, size, level) {
+                for (var y = 0; y < maze.length; y++) {
+                    var maze_row = $('<div class="row"></div>').appendTo(maze_element);
+                    for (var x = 0; x < maze[y].length; x++) {
+                        var maze_cell = $('<div class="cell"></div>')
+                            .appendTo(maze_row)
+                            .css('height', size)
+                            .css('width', size);
+                        if (level !== 13 && level !== 14) {
+                            maze_cell
+                                .toggleClass('border-top', y === 0)
+                                .toggleClass('border-left', x === 0)
+                                .toggleClass('border-down', !can_go(maze, [y, x], 'down'))
+                                .toggleClass('border-right', !can_go(maze, [y, x], 'right'));
+                        }
+                    }
+                }
+            }
             var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
             var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
             function play_level(level) {
                 var height = 4 + 2 * Math.min(11, level);
                 var width = 4 + 2 * Math.min(11, level);
+                switch (level) {
+                    case 11:
+                        height = 39;
+                        width = 13;
+                        break;
+                    case 12:
+                        height /= 2;
+                        width *= 2;
+                        break;
+                    case 13:
+                        height = 18;
+                        width = 18;
+                        break;
+                    case 14:
+                        height = 14;
+                        width = 14;
+                        break;
+                }
                 var maze = generateMaze(height, width);
                 var size = Math.min(($(window).height() - 50) / height, ($(window).width() - 50) / width);
+                if (level === 18) {
+                    size = (Math.min($(window).height(), $(window).width()) - 50) / Math.max(height, width) / Math.sqrt(2);
+                }
                 var playing = true;
 
                 var maze_element = $('#maze')
-                    .css('width', width * size);
-                draw_maze(maze, maze_element, size);
+                    .css('width', width * size)
+                    .toggleClass('spinning', level === 18)
+                    .removeClass('pivot-90')
+                    .removeClass('pivot-180')
+                    .removeClass('pivot-270');
+                draw_maze(maze, maze_element, size, level);
 
                 var good_grem = $('<div id="end_grem" class="grem"></div>')
                     .appendTo(maze_element)
@@ -170,7 +231,7 @@
                     .css('width', size - 8)
                     .css('transform', 'translate3d(' + ((width - 1) * size) + 'px, ' + ((height - 1) * size) + 'px, 0)');
 
-                if (level >= 5) {
+                if (level >= 5 && level !== 13 && level !== 14) {
                     var right_dir = 'right';
                     var right_pos = [0, 0];
                     var right_grem = $('<div id="bad_grem" class="grem"></div>')
@@ -192,10 +253,10 @@
                         if (right_pos[0] === height - 1 && right_pos[1] === width - 1) {
                             playing = false;
                         }
-                    }, 150 - Math.min(75, (level - 5) * 10));
+                    }, 150 - Math.min(70, (level - 5) * 10));
                 }
 
-                if (level >= 6) {
+                if (level >= 6 && level !== 13 && level !== 14) {
                     var left_dir = 'down';
                     var left_pos = [0, 0];
                     var left_grem = $('<div id="bad_grem" class="grem"></div>')
@@ -217,10 +278,10 @@
                         if (left_pos[0] === height - 1 && left_pos[1] === width - 1) {
                             playing = false;
                         }
-                    }, 150 - Math.min(75, (level - 5) * 10));
+                    }, 150 - Math.min(70, (level - 5) * 10));
                 }
 
-                if (level === 8 && level % 8 === 0) {
+                if (level >= 8 && level % 8 === 0) {
                     setTimeout(function() {
                         setInterval(function reset_level() {
                             if (!playing) {
@@ -234,6 +295,55 @@
                     }, 5000);
                 }
 
+                if (level === 13 || level === 14) {
+                    $($(maze_element
+                        .find('.row').get(0))
+                        .find('.cell').get(0))
+                        .toggleClass('border-top', 0 === 0)
+                        .toggleClass('border-left', 0 === 0)
+                        .toggleClass('border-down', !can_go(maze, [0, 0], 'down'))
+                        .toggleClass('border-right', !can_go(maze, [0, 0], 'right'));
+                }
+                var vision_timeouts;
+                if (level === 14) {
+                    vision_timeouts = [];
+                    for (var y = 0; y < height; y++) {
+                        vision_timeouts[y] = [];
+                        for (var x = 0; x < width; x++) {
+                            vision_timeouts[y][x] = null;
+                        }
+                    }
+                }
+
+                if (level === 17) {
+                    setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
+                        maze_element.addClass('pivot-90');
+                    }, 5000);
+                    setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
+                        maze_element.removeClass('pivot-90');
+                        maze_element.addClass('pivot-180');
+                    }, 20000);
+                    setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
+                        maze_element.removeClass('pivot-180');
+                        maze_element.addClass('pivot-270');
+                    }, 35000);
+                    setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
+                        maze_element.removeClass('pivot-270');
+                    }, 50000);
+                }
+
                 var pos = [0, 0];
                 var good_grem = $('<div id="good_grem" class="grem"></div>')
                     .appendTo(maze_element)
@@ -244,6 +354,7 @@
                     if (!playing) {
                         return;
                     }
+                    var last_pos = [pos[0], pos[1]];
                     switch (e.which) {
                         case 37:
                         case 72:
@@ -276,7 +387,56 @@
                         default:
                             return;
                     }
+                    if (level === 14) {
+                        clearTimeout(vision_timeouts[pos[0]][pos[1]]);
+                        vision_timeouts[pos[0]][pos[1]] = null;
+                        vision_timeouts[last_pos[0]][last_pos[1]] = setTimeout(function() {
+                            if (!playing) {
+                                return;
+                            }
+                            $($(maze_element
+                                .find('.row').get(last_pos[0]))
+                                .find('.cell').get(last_pos[1]))
+                                .removeClass('border-top')
+                                .removeClass('border-left')
+                                .removeClass('border-down')
+                                .removeClass('border-right');
+                            if (last_pos[0] !== 0 && !vision_timeouts[last_pos[0] - 1][last_pos[1]]) {
+                                $($(maze_element
+                                    .find('.row').get(last_pos[0] - 1))
+                                    .find('.cell').get(last_pos[1]))
+                                    .removeClass('border-down');
+                            }
+                            if (last_pos[1] !== 0 && !vision_timeouts[last_pos[0]][last_pos[1] - 1]) {
+                                $($(maze_element
+                                    .find('.row').get(last_pos[0]))
+                                    .find('.cell').get(last_pos[1] - 1))
+                                    .removeClass('border-right');
+                            }
+                        }, 7000);
+                    }
                     good_grem.css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
+                    if (level === 13 || level === 14) {
+                        $($(maze_element
+                            .find('.row').get(pos[0]))
+                            .find('.cell').get(pos[1]))
+                            .toggleClass('border-top', pos[0] === 0)
+                            .toggleClass('border-left', pos[1] === 0)
+                            .toggleClass('border-down', !can_go(maze, pos, 'down'))
+                            .toggleClass('border-right', !can_go(maze, pos, 'right'));
+                        if (pos[0] !== 0) {
+                            $($(maze_element
+                                .find('.row').get(pos[0] - 1))
+                                .find('.cell').get(pos[1]))
+                                .toggleClass('border-down', !can_go(maze, [pos[0] - 1, pos[1]], 'down'));
+                        }
+                        if (pos[1] !== 0) {
+                            $($(maze_element
+                                .find('.row').get(pos[0]))
+                                .find('.cell').get(pos[1] - 1))
+                                .toggleClass('border-right', !can_go(maze, [pos[0], pos[1] - 1], 'right'));
+                        }
+                    }
                     if (pos[0] === height - 1 && pos[1] === width - 1) {
                         playing = false;
                         maze_element.empty();
@@ -300,7 +460,7 @@
                     }
                 });
             }
-            play_level(12);
+            play_level(0);
         </script>
     </body>
 </html>
