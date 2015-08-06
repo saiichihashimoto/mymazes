@@ -110,6 +110,21 @@
                 }
                 return maze;
             }
+            function draw_maze(maze, maze_element, size) {
+                for (var y = 0; y < maze.length; y++) {
+                    var maze_row = $('<div class="row"></div>').appendTo(maze_element);
+                    for (var x = 0; x < maze[y].length; x++) {
+                        var maze_cell = $('<div class="cell"></div>')
+                            .appendTo(maze_row)
+                            .toggleClass('border-top', y === 0)
+                            .toggleClass('border-left', x === 0)
+                            .toggleClass('border-bottom', (y === maze.length - 1) || !maze[y][x][0])
+                            .toggleClass('border-right', (x === maze[y].length - 1) || !maze[y][x][1])
+                            .css('height', size)
+                            .css('width', size);
+                    }
+                }
+            }
             function can_go(maze, pos, dir) {
                 switch (dir) {
                     case 'up':
@@ -139,27 +154,15 @@
             var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
             var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
             function play_level(level) {
-                var height = 4 + 2 * level;
-                var width = 4 + 2 * level;
+                var height = 4 + 2 * Math.min(11, level);
+                var width = 4 + 2 * Math.min(11, level);
                 var maze = generateMaze(height, width);
                 var size = Math.min(($(window).height() - 50) / height, ($(window).width() - 50) / width);
                 var playing = true;
 
                 var maze_element = $('#maze')
                     .css('width', width * size);
-                for (var y = 0; y < height; y++) {
-                    var maze_row = $('<div class="row"></div>').appendTo(maze_element);
-                    for (var x = 0; x < width; x++) {
-                        var maze_cell = $('<div class="cell"></div>')
-                            .appendTo(maze_row)
-                            .toggleClass('border-top', y === 0)
-                            .toggleClass('border-left', x === 0)
-                            .toggleClass('border-bottom', (y === height - 1) || !maze[y][x][0])
-                            .toggleClass('border-right', (x === width - 1) || !maze[y][x][1])
-                            .css('height', size)
-                            .css('width', size);
-                    }
-                }
+                draw_maze(maze, maze_element, size);
 
                 var good_grem = $('<div id="end_grem" class="grem"></div>')
                     .appendTo(maze_element)
@@ -175,7 +178,7 @@
                         .css('height', size - 8)
                         .css('width', size - 8)
                         .css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
-                    function move_right_grem() {
+                    setInterval(function move_right_grem() {
                         if (!playing) {
                             clearInterval(move_right_grem);
                             return;
@@ -189,8 +192,7 @@
                         if (right_pos[0] === height - 1 && right_pos[1] === width - 1) {
                             playing = false;
                         }
-                    }
-                    setInterval(move_right_grem, 150 - Math.min(75, (level - 5) * 10));
+                    }, 150 - Math.min(75, (level - 5) * 10));
                 }
 
                 if (level >= 6) {
@@ -201,7 +203,7 @@
                         .css('height', size - 8)
                         .css('width', size - 8)
                         .css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
-                    function move_left_grem() {
+                    setInterval(function move_left_grem() {
                         if (!playing) {
                             clearInterval(move_left_grem);
                             return;
@@ -215,8 +217,21 @@
                         if (left_pos[0] === height - 1 && left_pos[1] === width - 1) {
                             playing = false;
                         }
-                    }
-                    setInterval(move_left_grem, 150 - Math.min(75, (level - 5) * 10));
+                    }, 150 - Math.min(75, (level - 5) * 10));
+                }
+
+                if (level === 8 && level % 8 === 0) {
+                    setTimeout(function() {
+                        setInterval(function reset_level() {
+                            if (!playing) {
+                                clearInterval(reset_level);
+                                return;
+                            }
+                            maze = generateMaze(height, width);
+                            maze_element.find('.row').remove();
+                            draw_maze(maze, maze_element, size);
+                        }, 3000);
+                    }, 5000);
                 }
 
                 var pos = [0, 0];
@@ -275,18 +290,17 @@
                 level_elem.text(level);
 
                 var start;
-                function updateStats(timestamp) {
+                window.requestAnimationFrame(function updateStats(timestamp) {
                     if (!start) start = timestamp;
                     var time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
-                    time_remaining_elem.text(time_remaining.toFixed(3));
                     playing = (time_remaining > 0) && playing;
+                    time_remaining_elem.text(playing ? time_remaining.toFixed(3) : 0);
                     if (playing) {
                         window.requestAnimationFrame(updateStats);
                     }
-                }
-                window.requestAnimationFrame(updateStats);
+                });
             }
-            play_level(0);
+            play_level(12);
         </script>
     </body>
 </html>
