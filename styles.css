@@ -1,0 +1,145 @@
+* {
+    box-sizing: border-box;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+body {
+    border-color: black;
+}
+.maze-container, .overlay-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.maze {
+    position: relative;
+}
+.row {
+    overflow: auto;
+}
+.cell {
+    float:left;
+}
+.border-top {
+    border-top: 2px solid;
+}
+.border-down {
+    border-bottom: 2px solid;
+}
+.border-left {
+    border-left: 2px solid;
+}
+.border-right {
+    border-right: 2px solid;
+}
+.grem {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    margin: 4px;
+    transition: all .05s ease-in-out;
+}
+.good-grem {
+    background: blue;
+}
+.end-grem {
+    background: green;
+}
+.bad-grem-0 {
+    background: red;
+}
+.bad-grem-1 {
+    background: maroon;
+}
+.bad-grem-2 {
+    background: orange;
+}
+.bad-grem-3 {
+    background: crimson;
+}
+.bad-grem-4 {
+    background: darkred;
+}
+.bad-grem-5 {
+    background: firebrick;
+}
+.bad-grem-6 {
+    background: orangered;
+}
+.bad-grem-7 {
+    background: tomato;
+}
+.bad-grem-8 {
+    background: hotpink;
+}
+.bad-grem-9 {
+    background: Fuchsia;
+}
+.spinning {
+    animation: spin 60000ms linear 0s infinite;
+    -webkit-animation: spin 60000ms linear 0s infinite;
+    -moz-animation: spin 60000ms linear 0s infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+.pivot-90, .pivot-180, .pivot-270 {
+    transition: all .5s ease-in-out;
+}
+.pivot-90 {
+    transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+}
+.pivot-180 {
+    transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+}
+.pivot-270 {
+    transform: rotate(270deg);
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+}
+.overlay-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+}
+.overlay {
+    border: 2px solid black;
+    background: white;
+    position: relative;
+    width: 500px;
+    height: 300px;
+}
+#time_remaining {
+    position: absolute;
+    font-size: 40px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+.stats {
+    font-size: 30px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.level-13, .level-14 {
+    background: black;
+    color: white;
+    border-color: white;
+}
