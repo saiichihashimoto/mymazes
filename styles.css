@@ -2,6 +2,10 @@
     box-sizing: border-box;
     font-family: "Lucida Console", Monaco, monospace;
 }
+a {
+    text-decoration: underline;
+    cursor: pointer;
+}
 body {
     border-color: black;
 }
