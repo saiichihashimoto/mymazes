@@ -43,14 +43,41 @@
                 margin: 4px;
                 transition: all .05s ease-in-out;
             }
-            #good_grem {
+            .good-grem {
                 background: blue;
             }
-            #bad_grem {
+            .end-grem {
+                background: green;
+            }
+            .bad-grem-0 {
                 background: red;
             }
-            #end_grem {
-                background: green;
+            .bad-grem-1 {
+                background: maroon;
+            }
+            .bad-grem-2 {
+                background: orange;
+            }
+            .bad-grem-3 {
+                background: crimson;
+            }
+            .bad-grem-4 {
+                background: darkred;
+            }
+            .bad-grem-5 {
+                background: firebrick;
+            }
+            .bad-grem-6 {
+                background: orangered;
+            }
+            .bad-grem-7 {
+                background: tomato;
+            }
+            .bad-grem-8 {
+                background: hotpink;
+            }
+            .bad-grem-9 {
+                background: Fuchsia;
             }
             .spinning {
                 animation: spin 60000ms linear 0s infinite;
@@ -295,7 +322,7 @@
                     .removeClass('pivot-270');
                 draw_maze(maze, maze_element, size, level);
 
-                var end_grem = $('<div id="end_grem" class="grem"></div>')
+                var end_grem = $('<div class="grem end-grem"></div>')
                     .appendTo(maze_element)
                     .css('height', size - 8)
                     .css('width', size - 8)
@@ -304,8 +331,9 @@
                 if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
                     var right_dir = 'right';
                     var right_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
-                    var right_grem = $('<div id="bad_grem" class="grem"></div>')
+                    var right_grem = $('<div class="grem"></div>')
                         .appendTo(maze_element)
+                        .addClass('bad-grem-' + Math.floor(10 * Math.random()))
                         .css('height', size - 8)
                         .css('width', size - 8)
                         .css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
@@ -336,8 +364,9 @@
                 if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
                     var left_dir = 'down';
                     var left_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
-                    var left_grem = $('<div id="bad_grem" class="grem"></div>')
+                    var left_grem = $('<div class="grem"></div>')
                         .appendTo(maze_element)
+                        .addClass('bad-grem-' + Math.floor(10 * Math.random()))
                         .css('height', size - 8)
                         .css('width', size - 8)
                         .css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
@@ -458,7 +487,7 @@
                 }
 
                 var pos = [0, 0];
-                var good_grem = $('<div id="good_grem" class="grem"></div>')
+                var good_grem = $('<div class="grem good-grem"></div>')
                     .appendTo(maze_element)
                     .css('height', size - 8)
                     .css('width', size - 8)
