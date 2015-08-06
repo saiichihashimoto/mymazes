@@ -6,15 +6,15 @@
             * {
                 box-sizing: border-box;
             }
-            .maze-container {
+            .maze-container, .overlay-container {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 height: 100%;
+                width: 100%;
             }
             .maze {
                 position: relative;
-                transition: all .5s ease-in-out;
             }
             .row {
                 overflow: auto;
@@ -73,6 +73,9 @@
                 from { -moz-transform: rotate(0deg); }
                 to { -moz-transform: rotate(360deg); }
             }
+            .pivot-90, .pivot-180, .pivot-270 {
+                transition: all .5s ease-in-out;
+            }
             .pivot-90 {
                 transform: rotate(90deg);
                 -webkit-transform: rotate(90deg);
@@ -88,6 +91,18 @@
                 -webkit-transform: rotate(270deg);
                 -moz-transform: rotate(270deg);
             }
+            .overlay-container {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+            }
+            .overlay {
+                border: 2px solid black;
+                background: white;
+                position: relative;
+                width: 500px;
+                height: 300px;
+            }
         </style>
     </head>
     <body>
@@ -99,6 +114,12 @@
         <div class="maze-container">
             <div id="maze" class="maze"></div>
         </div>
+        <div class="overlay-container">
+            <div id="lost_overlay" class="overlay">
+                You Ran out of time!
+                <a id="start_over">Start Over</a>
+            </div>
+        </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script>
             var FIRST_RIGHT_HAND_STAGE = 5;
@@ -106,13 +127,25 @@
             var RESTARTING_STAGE       = 8;
             var WIDE_STAGE             = 10;
             var TALL_STAGE             = 11;
+            var STOP_GROWING_STAGE     = 11;
             var BATTLE_STAGE           = 12;
+            var STOP_SPEEDING_UP_STAGE = 12;
             var TRAILBLAZIN_STAGE      = 13;
             var DARKNESS_STAGE         = 14;
             var RESTARTING_STAGE_2     = 16;
             var PIVOTING_STAGE         = 17;
             var SPINNING_STAGE         = 18;
-            var TRICK_STAGE            = 20;
+            var TRICK_STAGE            = 19;
+
+            var KEY_LEFT = 37;
+            var KEY_UP = 38;
+            var KEY_RIGHT = 39;
+            var KEY_DOWN = 40;
+
+            var H = 72;
+            var J = 74;
+            var K = 75;
+            var L = 76;
 
             var TIME_BEFORE_SHAKE = 500;
 
@@ -207,10 +240,11 @@
             var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
             var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
             function play_level(level, score) {
-                $('#score').text(score);
                 window.location.hash = level;
-                var height = 4 + 2 * Math.min(11, level);
-                var width = 4 + 2 * Math.min(11, level);
+                $('#score').text(score);
+                $('#lost_overlay').hide();
+                var height = 4 + 2 * Math.min(STOP_GROWING_STAGE, level);
+                var width = 4 + 2 * Math.min(STOP_GROWING_STAGE, level);
                 switch (level) {
                     case TALL_STAGE:
                         height = 39;
@@ -242,6 +276,7 @@
                 var end = (level !== BATTLE_STAGE) ? [height - 1, width - 1] : [19, 26];
 
                 var maze_element = $('#maze')
+                    .empty()
                     .css('width', width * size)
                     .removeClass('shake shake-constant')
                     .toggleClass('spinning', level === SPINNING_STAGE)
@@ -274,11 +309,13 @@
                             right_dir = counter_clockwise[right_dir];
                         }
                         right_pos = go(right_pos, right_dir)
-                        right_grem.css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
+                        window.requestAnimationFrame(function() {
+                            right_grem.css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
+                        });
                         if (right_pos[0] === end[0] && right_pos[1] === end[1]) {
                             playing = false;
                         }
-                    }, 150 - Math.min(70, (level - 5) * 10));
+                    }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
                 }
 
                 if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
@@ -299,11 +336,13 @@
                             left_dir = clockwise[left_dir];
                         }
                         left_pos = go(left_pos, left_dir)
-                        left_grem.css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
+                        window.requestAnimationFrame(function() {
+                            left_grem.css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
+                        });
                         if (left_pos[0] === end[0] && left_pos[1] === end[1]) {
                             playing = false;
                         }
-                    }, 150 - Math.min(70, (level - 5) * 10));
+                    }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
                 }
 
                 if (level === RESTARTING_STAGE || level === RESTARTING_STAGE_2) {
@@ -350,6 +389,7 @@
                     }
                 }
 
+                var key_offset = 0;
                 if (level === PIVOTING_STAGE) {
                     setTimeout(function() {
                         if (!playing) {
@@ -365,11 +405,13 @@
                                 if (!playing) {
                                     return;
                                 }
+                                key_offset++;
                                 maze_element.addClass('pivot-90');
                                 setTimeout(function() {
                                     if (!playing) {
                                         return;
                                     }
+                                    key_offset++;
                                     maze_element
                                         .removeClass('pivot-90')
                                         .addClass('pivot-180');
@@ -377,6 +419,7 @@
                                         if (!playing) {
                                             return;
                                         }
+                                        key_offset++;
                                         maze_element
                                             .removeClass('pivot-180')
                                             .addClass('pivot-270');
@@ -384,6 +427,7 @@
                                             if (!playing) {
                                                 return;
                                             }
+                                            key_offset++;
                                             maze_element.removeClass('pivot-270');
                                         }, 15000);
                                     }, 15000);
@@ -405,29 +449,29 @@
                     }
                     var last_pos = [pos[0], pos[1]];
                     switch (e.which) {
-                        case 37:
-                        case 72:
+                        case KEY_LEFT + ((KEY_LEFT + key_offset - KEY_LEFT) % 4):
+                        case H:
                             if (!can_go(maze, pos, 'left')) {
                                 return;
                             }
                             pos = go(pos, 'left')
                             break;
-                        case 38:
-                        case 75:
+                        case KEY_LEFT + ((KEY_UP + key_offset - KEY_LEFT) % 4):
+                        case K:
                             if (!can_go(maze, pos, 'up')) {
                                 return;
                             }
                             pos = go(pos, 'up')
                             break;
-                        case 39:
-                        case 76:
+                        case KEY_LEFT + ((KEY_RIGHT + key_offset - KEY_LEFT) % 4):
+                        case L:
                             if (!can_go(maze, pos, 'right')) {
                                 return;
                             }
                             pos = go(pos, 'right')
                             break;
-                        case 40:
-                        case 74:
+                        case KEY_LEFT + ((KEY_DOWN + key_offset - KEY_LEFT) % 4):
+                        case J:
                             if (!can_go(maze, pos, 'down')) {
                                 return;
                             }
@@ -500,7 +544,6 @@
                             return;
                         }
                         playing = false;
-                        maze_element.empty();
                         play_level(level + 1, score + (level + 1) * Math.ceil(time_remaining));
                     }
                 });
@@ -519,6 +562,11 @@
                     time_remaining_elem.text(time_remaining.toFixed(3));
                     if (playing) {
                         window.requestAnimationFrame(updateStats);
+                    } else if (time_remaining <= 0) {
+                        $('#lost_overlay').show();
+                        $('#lost_overlay').find('#start_over').one('click', function() {
+                            play_level(level, score / 2);
+                        });
                     }
                 });
             }
