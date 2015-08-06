@@ -1,0 +1,211 @@
+<html>
+    <head>
+        <title>Maze</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            .maze-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+            .maze {
+                position: relative;
+            }
+            .row {
+                overflow: auto;
+            }
+            .cell {
+                float:left;
+            }
+            .border-top {
+                border-top: 2px solid black;
+            }
+            .border-bottom {
+                border-bottom: 2px solid black;
+            }
+            .border-left {
+                border-left: 2px solid black;
+            }
+            .border-right {
+                border-right: 2px solid black;
+            }
+            .grem {
+                background: red;
+                position: absolute;
+                left: 0;
+                top: 0;
+                border-radius: 50%;
+                margin: 4px;
+                transition: all .05s ease-in-out;
+            }
+            .stats {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="stats" class="stats">
+            <b>Level:</b> <span id="level"></span><br>
+            <b>Time Remaining:</b> <span id="time_remaining"></span><br>
+        </div>
+        <div class="maze-container">
+            <div id="maze" class="maze">
+                <div id="grem" class="grem"></div>
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script>
+            function findTopCell(disjoint_set, cell) {
+                var next_cell = disjoint_set[cell[0]][cell[1]];
+                if (!next_cell) {
+                    return cell;
+                }
+                next_cell = findTopCell(disjoint_set, next_cell);
+                // disjoint_set[cell[0]][cell[1]] = next_cell;
+                return next_cell;
+            }
+            function generateMaze(height, width) {
+                var walls = [];
+                var disjoint_set = [];
+                var maze = [];
+                for (var y = 0; y < height; y++) {
+                    disjoint_set[y] = [];
+                    maze[y] = [];
+                    for (var x = 0; x < width; x++) {
+                        disjoint_set[y][x] = null;
+                        maze[y][x] = [false, false];
+                        if (y + 1 < height) {
+                            walls.push([[y, x], [true, false]]);
+                        }
+                        if (x + 1 < width) {
+                            walls.push([[y, x], [false, true]]);
+                        }
+                    }
+                }
+                var walls_count = walls.length;
+                for (var i = 0; i < walls_count; i++) {
+                    var h = Math.floor(Math.random() * walls.length);
+                    var wall = walls[h];
+                    walls.splice(h, 1);
+                    var cell_0 = wall[0];
+                    var cell_1 = [cell_0[0] + wall[1][0], cell_0[1] + wall[1][1]];
+                    var cell_0_top = findTopCell(disjoint_set, cell_0);
+                    var cell_1_top = findTopCell(disjoint_set, cell_1);
+                    if (cell_0_top[0] !== cell_1_top[0] || cell_0_top[1] !== cell_1_top[1]) {
+                        disjoint_set[cell_1_top[0]][cell_1_top[1]] = cell_0_top;
+                        var prev_val = maze[cell_0[0]][cell_0[1]];
+                        maze[cell_0[0]][cell_0[1]] = [prev_val[0] || wall[1][0], prev_val[1] || wall[1][1]];
+                    }
+                }
+                return maze;
+            }
+            function play_level(level) {
+                var height = 4 + 2 * level;
+                var width = 4 + 2 * level;
+                var maze = generateMaze(height, width);
+                var size = Math.min(($(window).height() - 50) / height, ($(window).width() - 50) / width);
+                var playing = true;
+
+                var maze_element = $('#maze')
+                    .css('width', width * size);
+                maze_element.find('.row').remove();
+                for (var y = 0; y < height; y++) {
+                    var maze_row = $('<div class="row"></div>').appendTo(maze_element);
+                    for (var x = 0; x < width; x++) {
+                        var maze_cell = $('<div class="cell"></div>')
+                            .appendTo(maze_row)
+                            .toggleClass('border-top', y === 0)
+                            .toggleClass('border-left', x === 0)
+                            .toggleClass('border-bottom', (y === height - 1) || !maze[y][x][0])
+                            .toggleClass('border-right', (x === width - 1) || !maze[y][x][1])
+                            .css('height', size)
+                            .css('width', size);
+                    }
+                }
+
+                var pos = [0, 0];
+                var grem = $('#grem')
+                    .css('height', size - 8)
+                    .css('width', size - 8)
+                    .css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
+                $(document).on('keydown', function(e) {
+                    if (!playing) {
+                        return;
+                    }
+                    switch (e.which) {
+                        case 37:
+                        case 72:
+                            if (pos[1] === 0) {
+                                return;
+                            }
+                            if (!maze[pos[0]][pos[1] - 1][1]) {
+                                return;
+                            }
+                            pos[1]--;
+                            break;
+                        case 38:
+                        case 75:
+                            if (pos[0] === 0) {
+                                return;
+                            }
+                            if (!maze[pos[0] - 1][pos[1]][0]) {
+                                return;
+                            }
+                            pos[0]--;
+                            break;
+                        case 39:
+                        case 76:
+                            if (pos[1] === width - 1) {
+                                return;
+                            }
+                            if (!maze[pos[0]][pos[1]][1]) {
+                                return;
+                            }
+                            pos[1]++;
+                            break;
+                        case 40:
+                        case 74:
+                            if (pos[0] === height - 1) {
+                                return;
+                            }
+                            if (!maze[pos[0]][pos[1]][0]) {
+                                return;
+                            }
+                            pos[0]++;
+                            break;
+                        default:
+                            return;
+                    }
+                    grem.css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
+                    if (pos[0] === height - 1 && pos[1] === width - 1) {
+                        playing = false;
+                        play_level(level + 1);
+                    }
+                });
+
+                var time_remaining_elem = $('#time_remaining');
+                var level_elem = $('#level');
+
+                level_elem.text(level);
+
+                var start;
+                function updateStats(timestamp) {
+                    if (!start) start = timestamp;
+                    var time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
+                    time_remaining_elem.text(time_remaining.toFixed(3));
+                    playing = (time_remaining > 0) && playing;
+                    if (playing) {
+                        window.requestAnimationFrame(updateStats);
+                    }
+                }
+                window.requestAnimationFrame(updateStats);
+            }
+            play_level(0);
+        </script>
+    </body>
+</html>
