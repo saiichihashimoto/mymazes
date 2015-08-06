@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Maze</title>
+        <link rel="stylesheet" type="text/css" href="http://elrumordelaluz.github.io/csshake/css/csshake.min.css">
         <style>
             * {
                 box-sizing: border-box;
@@ -93,12 +94,28 @@
         <div id="stats" class="stats">
             <b>Level:</b> <span id="level"></span><br>
             <b>Time Remaining:</b> <span id="time_remaining"></span><br>
+            <b>Score:</b> <span id="score"></span><br>
         </div>
         <div class="maze-container">
             <div id="maze" class="maze"></div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script>
+            var FIRST_RIGHT_HAND_STAGE = 5;
+            var FIRST_LEFT_HAND_STAGE  = 6;
+            var RESTARTING_STAGE       = 8;
+            var WIDE_STAGE             = 10;
+            var TALL_STAGE             = 11;
+            var BATTLE_STAGE           = 12;
+            var TRAILBLAZIN_STAGE      = 13;
+            var DARKNESS_STAGE         = 14;
+            var RESTARTING_STAGE_2     = 16;
+            var PIVOTING_STAGE         = 17;
+            var SPINNING_STAGE         = 18;
+            var TRICK_STAGE            = 20;
+
+            var TIME_BEFORE_SHAKE = 500;
+
             function findTopCell(disjoint_set, cell) {
                 var next_cell = disjoint_set[cell[0]][cell[1]];
                 if (!next_cell) {
@@ -177,7 +194,7 @@
                             .appendTo(maze_row)
                             .css('height', size)
                             .css('width', size);
-                        if (level !== 13 && level !== 14) {
+                        if (level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
                             maze_cell
                                 .toggleClass('border-top', y === 0)
                                 .toggleClass('border-left', x === 0)
@@ -189,39 +206,45 @@
             }
             var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
             var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
-            function play_level(level) {
+            function play_level(level, score) {
+                $('#score').text(score);
                 window.location.hash = level;
                 var height = 4 + 2 * Math.min(11, level);
                 var width = 4 + 2 * Math.min(11, level);
                 switch (level) {
-                    case 11:
+                    case TALL_STAGE:
                         height = 39;
                         width = 13;
                         break;
-                    case 12:
-                        height /= 2;
-                        width *= 2;
+                    case WIDE_STAGE:
+                        height = 13;
+                        width = 52;
                         break;
-                    case 13:
+                    case BATTLE_STAGE:
+                        height = 39;
+                        width = 53;
+                        break;
+                    case TRAILBLAZIN_STAGE:
                         height = 18;
                         width = 18;
                         break;
-                    case 14:
+                    case DARKNESS_STAGE:
                         height = 14;
                         width = 14;
                         break;
                 }
                 var maze = generateMaze(height, width);
                 var size = Math.min(($(window).height() - 50) / height, ($(window).width() - 50) / width);
-                if (level === 18) {
+                if (level === SPINNING_STAGE) {
                     size = (Math.min($(window).height(), $(window).width()) - 50) / Math.max(height, width) / Math.sqrt(2);
                 }
                 var playing = true;
-                var end = [height - 1, width - 1];
+                var end = (level !== BATTLE_STAGE) ? [height - 1, width - 1] : [19, 26];
 
                 var maze_element = $('#maze')
                     .css('width', width * size)
-                    .toggleClass('spinning', level === 18)
+                    .removeClass('shake shake-constant')
+                    .toggleClass('spinning', level === SPINNING_STAGE)
                     .removeClass('pivot-90')
                     .removeClass('pivot-180')
                     .removeClass('pivot-270');
@@ -231,11 +254,11 @@
                     .appendTo(maze_element)
                     .css('height', size - 8)
                     .css('width', size - 8)
-                    .css('transform', 'translate3d(' + ((width - 1) * size) + 'px, ' + ((height - 1) * size) + 'px, 0)');
+                    .css('transform', 'translate3d(' + (end[1] * size) + 'px, ' + (end[0] * size) + 'px, 0)');
 
-                if (level >= 5 && level !== 13 && level !== 14) {
+                if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
                     var right_dir = 'right';
-                    var right_pos = [0, 0];
+                    var right_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
                     var right_grem = $('<div id="bad_grem" class="grem"></div>')
                         .appendTo(maze_element)
                         .css('height', size - 8)
@@ -258,9 +281,9 @@
                     }, 150 - Math.min(70, (level - 5) * 10));
                 }
 
-                if (level >= 6 && level !== 13 && level !== 14) {
+                if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
                     var left_dir = 'down';
-                    var left_pos = [0, 0];
+                    var left_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
                     var left_grem = $('<div id="bad_grem" class="grem"></div>')
                         .appendTo(maze_element)
                         .css('height', size - 8)
@@ -283,21 +306,31 @@
                     }, 150 - Math.min(70, (level - 5) * 10));
                 }
 
-                if (level >= 8 && level % 8 === 0) {
+                if (level === RESTARTING_STAGE || level === RESTARTING_STAGE_2) {
                     setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
                         setInterval(function reset_level() {
                             if (!playing) {
                                 clearInterval(reset_level);
                                 return;
                             }
-                            maze = generateMaze(height, width);
-                            maze_element.find('.row').remove();
-                            draw_maze(maze, maze_element, size);
-                        }, 3000);
+                            maze_element.addClass('shake shake-constant')
+                            setTimeout(function() {
+                                if (!playing) {
+                                    return;
+                                }
+                                maze_element.removeClass('shake shake-constant')
+                                maze = generateMaze(height, width);
+                                maze_element.find('.row').remove();
+                                draw_maze(maze, maze_element, size);
+                            }, TIME_BEFORE_SHAKE);
+                        }, 3000 - TIME_BEFORE_SHAKE);
                     }, 5000);
                 }
 
-                if (level === 13 || level === 14) {
+                if (level === TRAILBLAZIN_STAGE || level === DARKNESS_STAGE) {
                     $($(maze_element
                         .find('.row').get(0))
                         .find('.cell').get(0))
@@ -307,7 +340,7 @@
                         .toggleClass('border-right', !can_go(maze, [0, 0], 'right'));
                 }
                 var vision_timeouts;
-                if (level === 14) {
+                if (level === DARKNESS_STAGE) {
                     vision_timeouts = [];
                     for (var y = 0; y < height; y++) {
                         vision_timeouts[y] = [];
@@ -317,33 +350,47 @@
                     }
                 }
 
-                if (level === 17) {
+                if (level === PIVOTING_STAGE) {
                     setTimeout(function() {
                         if (!playing) {
                             return;
                         }
-                        maze_element.addClass('pivot-90');
-                    }, 5000);
-                    setTimeout(function() {
-                        if (!playing) {
-                            return;
-                        }
-                        maze_element.removeClass('pivot-90');
-                        maze_element.addClass('pivot-180');
-                    }, 20000);
-                    setTimeout(function() {
-                        if (!playing) {
-                            return;
-                        }
-                        maze_element.removeClass('pivot-180');
-                        maze_element.addClass('pivot-270');
-                    }, 35000);
-                    setTimeout(function() {
-                        if (!playing) {
-                            return;
-                        }
-                        maze_element.removeClass('pivot-270');
-                    }, 50000);
+                        maze_element.addClass('shake shake-constant')
+                        setTimeout(function() {
+                            if (!playing) {
+                                return;
+                            }
+                            maze_element.removeClass('shake shake-constant');
+                            setTimeout(function() {
+                                if (!playing) {
+                                    return;
+                                }
+                                maze_element.addClass('pivot-90');
+                                setTimeout(function() {
+                                    if (!playing) {
+                                        return;
+                                    }
+                                    maze_element
+                                        .removeClass('pivot-90')
+                                        .addClass('pivot-180');
+                                    setTimeout(function() {
+                                        if (!playing) {
+                                            return;
+                                        }
+                                        maze_element
+                                            .removeClass('pivot-180')
+                                            .addClass('pivot-270');
+                                        setTimeout(function() {
+                                            if (!playing) {
+                                                return;
+                                            }
+                                            maze_element.removeClass('pivot-270');
+                                        }, 15000);
+                                    }, 15000);
+                                }, 15000);
+                            }, 50);
+                        }, TIME_BEFORE_SHAKE);
+                    }, 5000 - TIME_BEFORE_SHAKE - 50);
                 }
 
                 var pos = [0, 0];
@@ -389,7 +436,7 @@
                         default:
                             return;
                     }
-                    if (level === 14) {
+                    if (level === DARKNESS_STAGE) {
                         clearTimeout(vision_timeouts[pos[0]][pos[1]]);
                         vision_timeouts[pos[0]][pos[1]] = null;
                         vision_timeouts[last_pos[0]][last_pos[1]] = setTimeout(function() {
@@ -418,7 +465,7 @@
                         }, 7000);
                     }
                     good_grem.css('transform', 'translate3d(' + (pos[1] * size) + 'px, ' + (pos[0] * size) + 'px, 0)');
-                    if (level === 13 || level === 14) {
+                    if (level === TRAILBLAZIN_STAGE || level === DARKNESS_STAGE) {
                         $($(maze_element
                             .find('.row').get(pos[0]))
                             .find('.cell').get(pos[1]))
@@ -440,26 +487,34 @@
                         }
                     }
                     if (pos[0] === end[0] && pos[1] === end[1]) {
-                        if (level === 20 && end[0] !== 0 && end[1] !== 0) {
+                        if (level === TRICK_STAGE && end[0] !== 0 && end[1] !== 0) {
                             end = [0, 0];
-                            end_grem.css('transform', 'translate3d(' + (end[1] * size) + 'px, ' + (end[0] * size) + 'px, 0)');
+                            maze_element.addClass('shake shake-constant');
+                            setTimeout(function() {
+                                if (!playing) {
+                                    return;
+                                }
+                                maze_element.removeClass('shake shake-constant');
+                                end_grem.css('transform', 'translate3d(' + (end[1] * size) + 'px, ' + (end[0] * size) + 'px, 0)');
+                            }, TIME_BEFORE_SHAKE);
                             return;
                         }
                         playing = false;
                         maze_element.empty();
-                        play_level(level + 1);
+                        play_level(level + 1, score + (level + 1) * Math.ceil(time_remaining));
                     }
                 });
 
                 var time_remaining_elem = $('#time_remaining');
                 var level_elem = $('#level');
+                var time_remainig = 60 * 1000;
 
                 level_elem.text(level);
 
                 var start;
                 window.requestAnimationFrame(function updateStats(timestamp) {
                     if (!start) start = timestamp;
-                    var time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
+                    time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
                     playing = (time_remaining > 0) && playing;
                     time_remaining_elem.text(time_remaining.toFixed(3));
                     if (playing) {
@@ -467,7 +522,7 @@
                     }
                 });
             }
-            play_level(parseInt(window.location.hash.substr(1)) || 0);
+            play_level(parseInt(window.location.hash.substr(1)) || 0, 0);
         </script>
     </body>
 </html>
