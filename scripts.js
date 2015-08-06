@@ -195,6 +195,7 @@ function play_level(level, score) {
             });
             if (right_pos[0] === end[0] && right_pos[1] === end[1]) {
                 playing = false;
+                ga('send', 'event', '/#' + level, 'lose', 'right hand grem');
                 $('#lost_overlay').show();
                 $('#lost_overlay').find('#reason').text('A Grem Beat You!');
                 $('#lost_overlay').find('#start_over').one('click', function() {
@@ -228,6 +229,7 @@ function play_level(level, score) {
             });
             if (left_pos[0] === end[0] && left_pos[1] === end[1]) {
                 playing = false;
+                ga('send', 'event', '/#' + level, 'lose', 'left hand grem');
                 $('#lost_overlay').show();
                 $('#lost_overlay').find('#reason').text('A Grem Beat You!');
                 $('#lost_overlay').find('#start_over').one('click', function() {
@@ -436,8 +438,10 @@ function play_level(level, score) {
                 return;
             }
             playing = false;
+            var new_score = score + (level + 1) * Math.ceil(time_remaining);
             ga('send', 'pageview', { page: '/#' + (level + 1) });
-            play_level(level + 1, score + (level + 1) * Math.ceil(time_remaining));
+            ga('send', 'event', '/#' + level, 'win', new_score);
+            play_level(level + 1, new_score);
         }
     });
 
@@ -458,6 +462,7 @@ function play_level(level, score) {
         if (playing) {
             window.requestAnimationFrame(updateStats);
         } else if (time_remaining <= 0) {
+            ga('send', 'event', '/#' + level, 'lose', 'time out');
             $('#lost_overlay').show();
             $('#lost_overlay').find('#reason').text('You Ran out of time!');
             $('#lost_overlay').find('#start_over').one('click', function() {
