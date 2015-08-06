@@ -5,6 +5,7 @@
         <style>
             * {
                 box-sizing: border-box;
+                font-family: "Lucida Console", Monaco, monospace;
             }
             .maze-container, .overlay-container {
                 display: flex;
@@ -50,11 +51,6 @@
             }
             #end_grem {
                 background: green;
-            }
-            .stats {
-                position: absolute;
-                top: 0;
-                left: 0;
             }
             .spinning {
                 animation: spin 60000ms linear 0s infinite;
@@ -103,20 +99,34 @@
                 width: 500px;
                 height: 300px;
             }
+            #time_remaining {
+                position: absolute;
+                font-size: 40px;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+            }
+            .stats {
+                font-size: 30px;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
         </style>
     </head>
     <body>
-        <div id="stats" class="stats">
+        <div class="stats">
             <b>Level:</b> <span id="level"></span><br>
-            <b>Time Remaining:</b> <span id="time_remaining"></span><br>
             <b>Score:</b> <span id="score"></span><br>
         </div>
+        <div id="time_remaining"></div>
         <div class="maze-container">
             <div id="maze" class="maze"></div>
         </div>
         <div class="overlay-container">
             <div id="lost_overlay" class="overlay">
-                You Ran out of time!
+                <span id="reason"></span>
                 <a id="start_over">Start Over</a>
             </div>
         </div>
@@ -268,7 +278,7 @@
                         break;
                 }
                 var maze = generateMaze(height, width);
-                var size = Math.min(($(window).height() - 50) / height, ($(window).width() - 50) / width);
+                var size = Math.min(($(window).height() - 50) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 50) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
                 if (level === SPINNING_STAGE) {
                     size = (Math.min($(window).height(), $(window).width()) - 50) / Math.max(height, width) / Math.sqrt(2);
                 }
@@ -314,6 +324,11 @@
                         });
                         if (right_pos[0] === end[0] && right_pos[1] === end[1]) {
                             playing = false;
+                            $('#lost_overlay').show();
+                            $('#lost_overlay').find('#reason').text('A Grem Beat You!');
+                            $('#lost_overlay').find('#start_over').one('click', function() {
+                                play_level(level, score / 2);
+                            });
                         }
                     }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
                 }
@@ -341,6 +356,11 @@
                         });
                         if (left_pos[0] === end[0] && left_pos[1] === end[1]) {
                             playing = false;
+                            $('#lost_overlay').show();
+                            $('#lost_overlay').find('#reason').text('A Grem Beat You!');
+                            $('#lost_overlay').find('#start_over').one('click', function() {
+                                play_level(level, score / 2);
+                            });
                         }
                     }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
                 }
@@ -559,11 +579,14 @@
                     if (!start) start = timestamp;
                     time_remaining = Math.max(0, (60 * 1000 + start - timestamp) / 1000);
                     playing = (time_remaining > 0) && playing;
-                    time_remaining_elem.text(time_remaining.toFixed(3));
+                    time_remaining_elem
+                        .text(time_remaining.toFixed(2))
+                        .css('color', time_remaining < 31 ? (time_remaining < 11 ? 'red' : 'orange') : '');
                     if (playing) {
                         window.requestAnimationFrame(updateStats);
                     } else if (time_remaining <= 0) {
                         $('#lost_overlay').show();
+                        $('#lost_overlay').find('#reason').text('You Ran out of time!');
                         $('#lost_overlay').find('#start_over').one('click', function() {
                             play_level(level, score / 2);
                         });
