@@ -440,7 +440,7 @@ function play_level(level, score) {
             playing = false;
             var new_score = score + (level + 1) * Math.ceil(time_remaining);
             ga('send', 'pageview', { page: '/#' + (level + 1) });
-            ga('send', 'event', '/#' + level, 'win', new_score);
+            ga('send', 'event', '/#' + level, 'win', null, new_score);
             if (level === 19) {
                 return;
             }
