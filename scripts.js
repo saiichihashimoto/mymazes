@@ -97,7 +97,9 @@ function go(pos, dir) {
 }
 function draw_maze(maze, maze_element, size, level) {
     for (var y = 0; y < maze.length; y++) {
-        var maze_row = $('<div class="row"></div>').appendTo(maze_element);
+        var maze_row = $('<div class="row"></div>')
+            .appendTo(maze_element)
+            .css('width', size * maze[y].length + 2 * (maze[y].length + 1));
         for (var x = 0; x < maze[y].length; x++) {
             var maze_cell = $('<div class="cell"></div>')
                 .appendTo(maze_row)
