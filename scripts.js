@@ -13,8 +13,9 @@ var RESTARTING_STAGE_2     = 16;
 var PIVOTING_STAGE         = 17;
 var SPINNING_STAGE         = 18;
 var TRICK_STAGE            = 19;
-var PORTAL_STAGE           = 20;
-var LAST_STAGE             = 20;
+var HALF_PORTAL_STAGE      = 20;
+var FOURTH_PORTAL_STAGE    = 21;
+var LAST_STAGE             = 21;
 
 var KEY_LEFT = 37;
 var KEY_UP = 38;
@@ -71,6 +72,12 @@ function generateMaze(height, width) {
         }
     }
     return maze;
+}
+function make_teleports(teleports, pos_0, pos_1) {
+    teleports[pos_0[0]] = teleports[pos_0[0]] || [];
+    teleports[pos_0[0]][pos_0[1]] = pos_1;
+    teleports[pos_1[0]] = teleports[pos_1[0]] || [];
+    teleports[pos_1[0]][pos_1[1]] = pos_0;
 }
 function can_go(maze, pos, dir) {
     switch (dir) {
@@ -158,25 +165,52 @@ function play_level(level, score) {
     }
     var maze;
     var teleports = [];
-    if (level === PORTAL_STAGE) {
-        var maze_0 = generateMaze(height, width / 2);
-        var maze_1 = generateMaze(height, width / 2);
-        var maze = [];
-        for (var y = 0; y < height; y++) {
-            maze[y] = [];
-            for (var x = 0; x < width / 2; x++) {
-                maze[y][x] = maze_0[y][x];
+    switch (level) {
+        case HALF_PORTAL_STAGE:
+            var mazes = [generateMaze(height, width / 2), generateMaze(height, width / 2)];
+            var maze = [];
+            for (var y = 0; y < height; y++) {
+                maze[y] = [];
+                for (var x = 0; x < width; x++) {
+                    maze[y][x] = mazes[0][y][x];
+                }
+                for (var x = width / 2; x < width; x++) {
+                    maze[y][x] = mazes[1][y][x - width / 2];
+                }
             }
-            for (var x = width / 2; x < width; x++) {
-                maze[y][x] = maze_0[y][x - width / 2];
+            make_teleports(teleports, [height - 1, width / 2 - 1], [0, width / 2]);
+            break;
+        case FOURTH_PORTAL_STAGE:
+            var mazes = [generateMaze(height / 2, width / 2),
+                         generateMaze(height / 2, width / 2),
+                         generateMaze(height / 2, width / 2),
+                         generateMaze(height / 2, width / 2)];
+            var maze = [];
+            for (var y = 0; y < height / 2; y++) {
+                maze[y] = [];
+                for (var x = 0; x < width / 2; x++) {
+                    maze[y][x] = mazes[0][y][x];
+                }
+                for (var x = width / 2; x < width; x++) {
+                    maze[y][x] = mazes[1][y][x - width / 2];
+                }
             }
-        }
-        teleports[0] = teleports[0] || [];
-        teleports[0][width / 2] = [height - 1, width / 2 - 1];
-        teleports[height - 1] = teleports[height - 1] || [];
-        teleports[height - 1][width / 2 - 1] = [0, width / 2];
-    } else {
-        maze = generateMaze(height, width);
+            for (var y = height / 2; y < height; y++) {
+                maze[y] = [];
+                for (var x = 0; x < width / 2; x++) {
+                    maze[y][x] = mazes[2][y - height / 2][x];
+                }
+                for (var x = width / 2; x < width; x++) {
+                    maze[y][x] = mazes[3][y - height / 2][x - width / 2];
+                }
+            }
+            make_teleports(teleports, [height / 2 - 1, width / 2 - 1], [0, width / 2]);
+            make_teleports(teleports, [height / 2 - 1, width - 1], [height / 2, 0]);
+            make_teleports(teleports, [height - 1, width / 2 - 1], [height / 2, width / 2]);
+            break;
+        default:
+            maze = generateMaze(height, width);
+            break;
     }
     var size = Math.min(($(window).height() - 50) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 50) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
     if (level === SPINNING_STAGE) {
