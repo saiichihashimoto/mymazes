@@ -73,11 +73,13 @@ function generateMaze(height, width) {
     }
     return maze;
 }
-function make_teleports(teleports, pos_0, pos_1) {
+function make_teleports(teleports, pos_0, pos_1, one_way) {
     teleports[pos_0[0]] = teleports[pos_0[0]] || [];
     teleports[pos_0[0]][pos_0[1]] = pos_1;
-    teleports[pos_1[0]] = teleports[pos_1[0]] || [];
-    teleports[pos_1[0]][pos_1[1]] = pos_0;
+    if (!one_way) {
+        teleports[pos_1[0]] = teleports[pos_1[0]] || [];
+        teleports[pos_1[0]][pos_1[1]] = pos_0;
+    }
 }
 function can_go(maze, pos, dir) {
     switch (dir) {
