@@ -8,10 +8,12 @@ var BATTLE_STAGE           = 12;
 var STOP_SPEEDING_UP_STAGE = 12;
 var TRAILBLAZIN_STAGE      = 13;
 var DARKNESS_STAGE         = 14;
+var REVERSE_STAGE          = 15;
 var RESTARTING_STAGE_2     = 16;
 var PIVOTING_STAGE         = 17;
 var SPINNING_STAGE         = 18;
 var TRICK_STAGE            = 19;
+var LAST_STAGE             = 19;
 
 var KEY_LEFT = 37;
 var KEY_UP = 38;
@@ -144,6 +146,10 @@ function play_level(level, score) {
             height = 14;
             width = 14;
             break;
+        case REVERSE_STAGE:
+            height = 10;
+            width = 10;
+            break;
     }
     var maze = generateMaze(height, width);
     var size = Math.min(($(window).height() - 50) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 50) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
@@ -173,7 +179,7 @@ function play_level(level, score) {
         .css('width', size - 8)
         .css('transform', 'translate3d(' + (end[1] * size) + 'px, ' + (end[0] * size) + 'px, 0)');
 
-    if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
+    if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE) {
         var right_dir = 'right';
         var right_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var right_grem = $('<div class="grem"></div>')
@@ -207,7 +213,7 @@ function play_level(level, score) {
         }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
     }
 
-    if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE) {
+    if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE) {
         var left_dir = 'down';
         var left_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var left_grem = $('<div class="grem"></div>')
@@ -447,7 +453,8 @@ function play_level(level, score) {
             var new_score = score + (level + 1) * Math.ceil(time_remaining);
             ga('send', 'pageview', { page: '/#' + (level + 1) });
             ga('send', 'event', '/#' + level, 'win', null, new_score);
-            if (level === 19) {
+            if (level === LAST_STAGE) {
+                $('body').addClass('done');
                 return;
             }
             play_level(level + 1, new_score);
@@ -459,6 +466,7 @@ function play_level(level, score) {
     var time_remainig = 60 * 1000;
 
     level_elem.text(level);
+    $('#last_level').text(LAST_STAGE);
 
     var start;
     window.requestAnimationFrame(function updateStats(timestamp) {

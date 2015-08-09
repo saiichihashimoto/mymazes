@@ -123,6 +123,7 @@ body {
 }
 .overlay {
     border: 2px solid black;
+    color: black;
     background: white;
     position: relative;
     width: 500px;
@@ -146,10 +147,34 @@ body {
     font-size: 30px;
     position: absolute;
     bottom: 0;
+    display: none;
     right: 0;
+}
+.notice {
+    color: red;
+    display: none;
+}
+body.level-0 .notice, body.level-0 .credits, body.done .credits {
+    display: inline;
 }
 .level-13, .level-14 {
     background: black;
     color: white;
     border-color: white;
+}
+.level-15 .cell {
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+}
+.level-15 .border-top {
+    border-top: 0;
+}
+.level-15 .border-down {
+    border-bottom: 0;
+}
+.level-15 .border-left {
+    border-left: 0;
+}
+.level-15 .border-right {
+    border-right: 0;
 }
