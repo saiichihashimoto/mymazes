@@ -347,6 +347,7 @@ function play_level(level, score) {
         switch (e.which) {
             case KEY_LEFT + ((KEY_LEFT + key_offset - KEY_LEFT) % 4):
             case H:
+                e.preventDefault();
                 if (!can_go(maze, pos, 'left')) {
                     return;
                 }
@@ -354,6 +355,7 @@ function play_level(level, score) {
                 break;
             case KEY_LEFT + ((KEY_UP + key_offset - KEY_LEFT) % 4):
             case K:
+                e.preventDefault();
                 if (!can_go(maze, pos, 'up')) {
                     return;
                 }
@@ -361,6 +363,7 @@ function play_level(level, score) {
                 break;
             case KEY_LEFT + ((KEY_RIGHT + key_offset - KEY_LEFT) % 4):
             case L:
+                e.preventDefault();
                 if (!can_go(maze, pos, 'right')) {
                     return;
                 }
@@ -368,6 +371,7 @@ function play_level(level, score) {
                 break;
             case KEY_LEFT + ((KEY_DOWN + key_offset - KEY_LEFT) % 4):
             case J:
+                e.preventDefault();
                 if (!can_go(maze, pos, 'down')) {
                     return;
                 }
