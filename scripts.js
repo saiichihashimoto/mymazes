@@ -267,7 +267,7 @@ function play_level(level, score) {
                     maze_element.find('.row').remove();
                     draw_maze(maze, maze_element, size);
                 }, TIME_BEFORE_SHAKE);
-            }, 3000 - TIME_BEFORE_SHAKE);
+            }, ((level === RESTARTING_STAGE) ? 3000 : 10000) - TIME_BEFORE_SHAKE);
         }, 5000);
     }
 
