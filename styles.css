@@ -48,9 +48,6 @@ body {
 .good-grem {
     background: blue;
 }
-.end-grem {
-    background: green;
-}
 .bad-grem-0 {
     background: red;
 }
@@ -80,6 +77,12 @@ body {
 }
 .bad-grem-9 {
     background: Fuchsia;
+}
+.end-grem {
+    background: green;
+}
+.teleport-grem {
+    background: cyan;
 }
 .spinning {
     animation: spin 60000ms linear 0s infinite;
