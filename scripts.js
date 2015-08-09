@@ -36,7 +36,7 @@ function findTopCell(disjoint_set, cell) {
     disjoint_set[cell[0]][cell[1]] = next_cell;
     return next_cell;
 }
-function generateMaze(height, width) {
+function generateMaze(height, width, areas) {
     var walls = [];
     var disjoint_set = [];
     var maze = [];
@@ -55,7 +55,8 @@ function generateMaze(height, width) {
         }
     }
     var walls_count = walls.length;
-    for (var i = 0; i < walls_count; i++) {
+    areas = areas || 1;
+    for (var i = 0; i <= walls_count - areas; i++) {
         var h = Math.floor(Math.random() * walls.length);
         var wall = walls[h];
         walls.splice(h, 1);
@@ -455,6 +456,7 @@ function play_level(level, score) {
             ga('send', 'event', '/#' + level, 'win', null, new_score);
             if (level === LAST_STAGE) {
                 $('body').addClass('done');
+                $('#score').text(new_score);
                 return;
             }
             play_level(level + 1, new_score);
