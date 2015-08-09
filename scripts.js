@@ -170,7 +170,7 @@ function play_level(level, score) {
     switch (level) {
         case HALF_PORTAL_STAGE:
             var mazes = [generateMaze(height, width / 2), generateMaze(height, width / 2)];
-            var maze = [];
+            maze = [];
             for (var y = 0; y < height; y++) {
                 maze[y] = [];
                 for (var x = 0; x < width; x++) {
@@ -187,7 +187,7 @@ function play_level(level, score) {
                          generateMaze(height / 2, width / 2),
                          generateMaze(height / 2, width / 2),
                          generateMaze(height / 2, width / 2)];
-            var maze = [];
+            maze = [];
             for (var y = 0; y < height / 2; y++) {
                 maze[y] = [];
                 for (var x = 0; x < width / 2; x++) {
