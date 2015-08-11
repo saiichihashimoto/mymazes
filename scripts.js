@@ -15,7 +15,8 @@ var SPINNING_STAGE         = 18;
 var TRICK_STAGE            = 19;
 var HALF_PORTAL_STAGE      = 20;
 var FOURTH_PORTAL_STAGE    = 21;
-var LAST_STAGE             = 21;
+var THANKS_STAGE           = 22;
+var LAST_STAGE             = 22;
 
 var KEY_LEFT = 37;
 var KEY_UP = 38;
@@ -128,6 +129,35 @@ function draw_maze(maze, maze_element, size, level) {
         }
     }
 }
+function draw_shapes(lines, height, width) {
+    var open_spot = {};
+    (lines || []).forEach(function(line) {
+        switch (line[0]) {
+            case 'x':
+                for (var x = line[2]; x <= line[3]; x++) {
+                    open_spot[line[1]] = open_spot[line[1]] || {};
+                    open_spot[line[1]][x] = true;
+                }
+                break;
+            case 'y':
+                for (var y = line[2]; y <= line[3]; y++) {
+                    open_spot[y] = open_spot[y] || {};
+                    open_spot[y][line[1]] = true;
+                }
+                break;
+        }
+    });
+
+    var maze = [];
+    for (var y = 0; y < height; y++) {
+        maze[y] = [];
+        for (var x = 0; x < width; x++) {
+            maze[y][x] = [(open_spot[y] && open_spot[y][x]) === (open_spot[y + 1] && open_spot[y + 1][x]),
+                          (open_spot[y] && open_spot[y][x]) === (open_spot[y] && open_spot[y][x + 1])];
+        }
+    }
+    return maze;
+}
 var counter_clockwise = { right: 'up', up: 'left', left: 'down', down: 'right' };
 var clockwise = { up: 'right', left: 'up', down: 'left', right: 'down' };
 function play_level(level, score) {
@@ -160,6 +190,10 @@ function play_level(level, score) {
         case REVERSE_STAGE:
             height = 10;
             width = 10;
+            break;
+        case THANKS_STAGE:
+            height = 13;
+            width = 28;
             break;
         default:
             height = 4 + 2 * Math.min(STOP_GROWING_STAGE, level);
@@ -211,6 +245,46 @@ function play_level(level, score) {
             make_teleports(teleports, [height / 2 - 1, width - 1], [height / 2, 0]);
             make_teleports(teleports, [height - 1, width / 2 - 1], [height / 2, width / 2]);
             break;
+        case THANKS_STAGE:
+            maze = draw_shapes([['x', 1, 1, 5], ['y', 3, 1, 5],                                                         // T
+                                ['y', 7, 1, 5], ['x', 3, 7, 10], ['y', 10, 1, 5],                                       // H
+                                ['y', 12, 1, 5], ['x', 1, 13, 15], ['x', 3, 13, 15], ['y', 15, 1, 5],                   // A
+                                ['y', 17, 1, 5], ['y', 18, 2, 3], ['y', 19, 3, 4], ['y', 20, 1, 5],                     // N
+                                ['y', 22, 1, 5], ['y', 23, 3, 3], ['y', 24, 2, 4], ['y', 25, 1, 2], ['y', 25, 4, 5],    // K
+                                ['y', 6, 7, 8], ['y', 7, 8, 9], ['y', 8, 9, 11], ['y', 9, 8, 9], ['y', 10, 7, 8],       // Y
+                                ['y', 12, 7, 11], ['x', 7, 13, 15], ['x', 11, 13, 15], ['y', 15, 7, 11],                // O
+                                ['y', 17, 7, 11], ['x', 11, 17, 20], ['y', 20, 7, 11],                                  // U
+                                ['y', 22, 7, 9], ['y', 22, 11, 11]                                                      // !
+                               ], height, width);
+            make_teleports(teleports, [1, 5], [9, 8], true);
+            make_teleports(teleports, [5, 3], [3, 23], true);
+            make_teleports(teleports, [7, 10], [5, 15]);
+            make_teleports(teleports, [1, 25], [5, 12]);
+            make_teleports(teleports, [5, 25], [1, 3], true);
+            make_teleports(teleports, [7, 6], [1, 3], true);
+            make_teleports(teleports, [1, 1], [7, 17], true);
+            make_teleports(teleports, [1, 12], [1, 3], true);
+            make_teleports(teleports, [1, 15], [1, 3], true);
+            make_teleports(teleports, [8, 17], [2, 13], true);
+            make_teleports(teleports, [2, 14], [9, 17], true);
+            make_teleports(teleports, [10, 17], [9, 13], true);
+            make_teleports(teleports, [8, 13], [9, 8], true);
+            make_teleports(teleports, [10, 14], [3, 23], true);
+            make_teleports(teleports, [10, 13], [2, 14], true);
+            make_teleports(teleports, [9, 14], [1, 3], true);
+            make_teleports(teleports, [2, 13], [9, 14], true);
+            make_teleports(teleports, [8, 14], [11, 17], true);
+            make_teleports(teleports, [11, 19], [1, 3], true);
+            make_teleports(teleports, [11, 20], [3, 23], true);
+            make_teleports(teleports, [11, 17], [10, 20], true);
+            make_teleports(teleports, [7, 20], [5, 17]);
+            make_teleports(teleports, [1, 20], [1, 7], true);
+            make_teleports(teleports, [3, 9], [1, 14]);
+            make_teleports(teleports, [1, 13], [3, 10]);
+            make_teleports(teleports, [1, 10], [1, 7], true);
+            make_teleports(teleports, [5, 10], [7, 22]);
+            make_teleports(teleports, [9, 22], [height - 1, width - 1]);
+            break;
         default:
             maze = generateMaze(height, width);
             break;
@@ -221,6 +295,17 @@ function play_level(level, score) {
     }
     var playing = true;
     var end = (level !== BATTLE_STAGE) ? [height - 1, width - 1] : [19, 26];
+    switch (level) {
+        case BATTLE_STAGE:
+            end = [19, 26];
+            break;
+        case THANKS_STAGE:
+            end = [0, 0];
+            break;
+        default:
+            end = [height - 1, width - 1];
+            break;
+    }
 
     $('body')
         .removeClass('level-' + (level - 1))
@@ -252,7 +337,7 @@ function play_level(level, score) {
         });
     });
 
-    if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE) {
+    if (level >= FIRST_RIGHT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE && level !== THANKS_STAGE) {
         var right_dir = 'right';
         var right_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var right_grem = $('<div class="grem"></div>')
@@ -289,7 +374,7 @@ function play_level(level, score) {
         }, 150 - 10 * (Math.min(STOP_SPEEDING_UP_STAGE, level) - Math.min(FIRST_RIGHT_HAND_STAGE, FIRST_LEFT_HAND_STAGE)));
     }
 
-    if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE) {
+    if (level >= FIRST_LEFT_HAND_STAGE && level !== TRAILBLAZIN_STAGE && level !== DARKNESS_STAGE && level !== REVERSE_STAGE && level !== THANKS_STAGE) {
         var left_dir = 'down';
         var left_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var left_grem = $('<div class="grem"></div>')
@@ -418,7 +503,7 @@ function play_level(level, score) {
         }, 5000 - TIME_BEFORE_SHAKE - 50);
     }
 
-    var pos = [0, 0];
+    var pos = THANKS_STAGE ? [1, 3] : [0, 0];
     var good_grem = $('<div class="grem good-grem"></div>')
         .appendTo(maze_element)
         .css('height', size - 8)
