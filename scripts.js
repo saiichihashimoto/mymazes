@@ -503,7 +503,7 @@ function play_level(level, score) {
         }, 5000 - TIME_BEFORE_SHAKE - 50);
     }
 
-    var pos = THANKS_STAGE ? [1, 3] : [0, 0];
+    var pos = (level === THANKS_STAGE) ? [1, 3] : [0, 0];
     var good_grem = $('<div class="grem good-grem"></div>')
         .appendTo(maze_element)
         .css('height', size - 8)
