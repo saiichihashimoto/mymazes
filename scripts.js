@@ -289,7 +289,7 @@ function play_level(level, score) {
             maze = generateMaze(height, width);
             break;
     }
-    var size = Math.min(($(window).height() - 2 * PADDING_FROM_EDGE) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 2 * PADDING_FROM_EDGE) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
+    var size = Math.min(($(window).height() - 2 * PADDING_FROM_EDGE) / height, ($(window).width() - 2 * PADDING_FROM_EDGE) / width);
     if (level === SPINNING_STAGE) {
         size = (Math.min($(window).height(), $(window).width()) - 2 * PADDING_FROM_EDGE) / Math.max(height, width) / Math.sqrt(2);
     }
@@ -416,23 +416,33 @@ function play_level(level, score) {
             if (!playing) {
                 return;
             }
-            setInterval(function reset_level() {
+            maze_element.addClass('shake shake-constant')
+            setTimeout(function() {
                 if (!playing) {
-                    clearInterval(reset_level);
                     return;
                 }
-                maze_element.addClass('shake shake-constant')
-                setTimeout(function() {
+                maze_element.removeClass('shake shake-constant')
+                maze = generateMaze(height, width);
+                maze_element.find('.row').remove();
+                draw_maze(maze, maze_element, size);
+                setInterval(function reset_level() {
                     if (!playing) {
+                        clearInterval(reset_level);
                         return;
                     }
-                    maze_element.removeClass('shake shake-constant')
-                    maze = generateMaze(height, width);
-                    maze_element.find('.row').remove();
-                    draw_maze(maze, maze_element, size);
-                }, TIME_BEFORE_SHAKE);
-            }, ((level === RESTARTING_STAGE) ? 3000 : 10000) - TIME_BEFORE_SHAKE);
-        }, 5000);
+                    maze_element.addClass('shake shake-constant')
+                    setTimeout(function() {
+                        if (!playing) {
+                            return;
+                        }
+                        maze_element.removeClass('shake shake-constant')
+                        maze = generateMaze(height, width);
+                        maze_element.find('.row').remove();
+                        draw_maze(maze, maze_element, size);
+                    }, TIME_BEFORE_SHAKE);
+                }, ((level === RESTARTING_STAGE) ? 3000 : 10000) - TIME_BEFORE_SHAKE);
+            }, TIME_BEFORE_SHAKE);
+        }, 5000 - TIME_BEFORE_SHAKE);
     }
 
     if (level === TRAILBLAZIN_STAGE || level === DARKNESS_STAGE) {
