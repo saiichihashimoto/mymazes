@@ -132,7 +132,7 @@ body {
     width: 500px;
     height: 300px;
 }
-#time_remaining {
+.time_remaining {
     position: absolute;
     font-size: 40px;
     bottom: 0;

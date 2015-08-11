@@ -28,6 +28,7 @@ var K = 75;
 var L = 76;
 
 var TIME_BEFORE_SHAKE = 500;
+var PADDING_FROM_EDGE = 50;
 
 function findTopCell(disjoint_set, cell) {
     var next_cell = disjoint_set[cell[0]][cell[1]];
@@ -214,9 +215,9 @@ function play_level(level, score) {
             maze = generateMaze(height, width);
             break;
     }
-    var size = Math.min(($(window).height() - 50) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 50) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
+    var size = Math.min(($(window).height() - 2 * PADDING_FROM_EDGE) / Math.max(height, 4 + 2 * STOP_GROWING_STAGE), ($(window).width() - 2 * PADDING_FROM_EDGE) / Math.max(width, 4 + 2 * STOP_GROWING_STAGE));
     if (level === SPINNING_STAGE) {
-        size = (Math.min($(window).height(), $(window).width()) - 50) / Math.max(height, width) / Math.sqrt(2);
+        size = (Math.min($(window).height(), $(window).width()) - 2 * PADDING_FROM_EDGE) / Math.max(height, width) / Math.sqrt(2);
     }
     var playing = true;
     var end = (level !== BATTLE_STAGE) ? [height - 1, width - 1] : [19, 26];
