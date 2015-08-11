@@ -573,4 +573,8 @@ function play_level(level, score) {
     });
 }
 ga('send', 'pageview', { page: '/#' + (parseInt(window.location.hash.substr(1)) || 0) });
-play_level(parseInt(window.location.hash.substr(1)) || 0, 0);
+var level = parseInt(window.location.hash.substr(1)) || 0;
+if (level < 0 || level > LAST_STAGE) {
+    level = 0;
+}
+play_level(level, 0);
