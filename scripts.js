@@ -283,7 +283,7 @@ function play_level(level, score) {
             make_teleports(teleports, [1, 13], [3, 10]);
             make_teleports(teleports, [1, 10], [1, 7], true);
             make_teleports(teleports, [5, 10], [7, 22]);
-            make_teleports(teleports, [9, 22], [height - 1, width - 1]);
+            make_teleports(teleports, [9, 22], [height - 1, width - 1], true);
             break;
         default:
             maze = generateMaze(height, width);
