@@ -152,6 +152,7 @@ body {
     bottom: 0;
     display: none;
     right: 0;
+    text-align: right;
 }
 .notice {
     color: red;
