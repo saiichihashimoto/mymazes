@@ -41,47 +41,39 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    border-radius: 50%;
     margin: 4px;
-    transition: all .05s ease-in-out;
+    transition: transform .05s ease-in-out;
+    background-position: 0% 50%;
+    background-repeat: no-repeat;
+    background-size: 80% 80%;
 }
 .good-grem {
-    background: blue;
+    background-image: url(images/mouse7.png);
 }
 .bad-grem-0 {
-    background: red;
+    background-image: url(images/mouse2.png);
 }
 .bad-grem-1 {
-    background: maroon;
+    background-image: url(images/mouse3.png);
 }
 .bad-grem-2 {
-    background: orange;
+    background-image: url(images/mouse4.png);
 }
 .bad-grem-3 {
-    background: crimson;
+    background-image: url(images/mouse5.png);
 }
 .bad-grem-4 {
-    background: darkred;
+    background-image: url(images/mouse6.png);
 }
 .bad-grem-5 {
-    background: firebrick;
-}
-.bad-grem-6 {
-    background: orangered;
-}
-.bad-grem-7 {
-    background: tomato;
-}
-.bad-grem-8 {
-    background: hotpink;
-}
-.bad-grem-9 {
-    background: Fuchsia;
+    background-image: url(images/mouse1.png);
 }
 .end-grem {
-    background: green;
+    background-image: url(images/cookie.png);
+    background-position: 50% 50%;
 }
 .teleport-grem {
+    border-radius: 50%;
     background: cyan;
 }
 .spinning {

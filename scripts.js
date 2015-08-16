@@ -342,7 +342,7 @@ function play_level(level, score) {
         var right_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var right_grem = $('<div class="grem"></div>')
             .appendTo(maze_element)
-            .addClass('bad-grem-' + Math.floor(10 * Math.random()))
+            .addClass('bad-grem-' + Math.floor(6 * Math.random()))
             .css('height', size - 8)
             .css('width', size - 8)
             .css('transform', 'translate3d(' + (right_pos[1] * size) + 'px, ' + (right_pos[0] * size) + 'px, 0)');
@@ -379,7 +379,7 @@ function play_level(level, score) {
         var left_pos = (level !== BATTLE_STAGE) ? [0, 0] : [height - 1, width - 1];
         var left_grem = $('<div class="grem"></div>')
             .appendTo(maze_element)
-            .addClass('bad-grem-' + Math.floor(10 * Math.random()))
+            .addClass('bad-grem-' + Math.floor(5 * Math.random()))
             .css('height', size - 8)
             .css('width', size - 8)
             .css('transform', 'translate3d(' + (left_pos[1] * size) + 'px, ' + (left_pos[0] * size) + 'px, 0)');
